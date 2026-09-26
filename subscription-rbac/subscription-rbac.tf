@@ -81,3 +81,8 @@ resource "azurerm_role_assignment" "root_user_access_administrator" {
   role_definition_name = "User Access Administrator"
   principal_id         = "5c31484e-cd53-4e9e-b30e-b29fb9f867a3"
 }
+resource "azurerm_role_assignment" "root_key_vault_administrator" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = "5c31484e-cd53-4e9e-b30e-b29fb9f867a3"
+}
