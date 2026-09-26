@@ -207,6 +207,43 @@ write_files:
       }
 
       # -----------------------------
+      # SonarQube
+      # -----------------------------
+      install_sonarqube() {
+        log "Preparing SonarQube"
+
+        docker volume create sonarqube_data || true
+        docker volume create sonarqube_extensions || true
+        docker volume create sonarqube_logs || true
+
+        sysctl -w vm.max_map_count=524288
+        sysctl -w fs.file-max=131072
+
+        cat > /etc/sysctl.d/99-sonarqube.conf <<EOF
+      vm.max_map_count=524288
+      fs.file-max=131072
+      EOF
+
+        sysctl --system
+
+        docker rm -f sonarqube 2>/dev/null || true
+
+        docker pull sonarqube:lts-community
+
+        docker run -d \
+          --name sonarqube \
+          --hostname sonarqube \
+          --restart unless-stopped \
+          -p 9000:9000 \
+          -v sonarqube_data:/opt/sonarqube/data \
+          -v sonarqube_extensions:/opt/sonarqube/extensions \
+          -v sonarqube_logs:/opt/sonarqube/logs \
+          sonarqube:lts-community
+
+        log "SonarQube deployment completed"
+      }
+
+      # -----------------------------
       # Azure managed identity login
       # -----------------------------
       az_login_identity() {
@@ -417,6 +454,8 @@ write_files:
         install_runner
         configure_runner
         start_runner_service
+
+        install_sonarqube
 
         rm -f "$PRIVATE_KEY_PATH"
 
