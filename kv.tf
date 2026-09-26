@@ -3,7 +3,7 @@ resource "azurerm_key_vault" "github" {
   location            = "eastasia"
   resource_group_name = "rg-app-dev-ea-01"
 
-  tenant_id = "REPLACE_WITH_TENANT_ID"
+  tenant_id = "6fe8efa4-2aa2-4b1a-a993-e8882a74ea74"
 
   sku_name = "standard"
 
