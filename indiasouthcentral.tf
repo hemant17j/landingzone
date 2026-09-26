@@ -11,21 +11,25 @@ resource "azurerm_resource_group" "appnet_dev_isc" {
 resource "azurerm_virtual_network" "app_dev_isc_01" {
   name                = "vnet-app-dev-isc-01"
   location            = "indiasouthcentral"
-  resource_group_name = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name = "rg-appnet-dev-isc-01"
   address_space       = ["10.20.0.0/16"]
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet" "app_dev_isc_vnet01_subnet01" {
   name                 = "subnet-app-dev-isc-01"
-  resource_group_name  = azurerm_resource_group.appnet_dev_isc.name
-  virtual_network_name = azurerm_virtual_network.app_dev_isc_01.name
+  resource_group_name  = "rg-appnet-dev-isc-01"
+  virtual_network_name = "vnet-app-dev-isc-01"
   address_prefixes     = ["10.20.1.0/24"]
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
 }
 
 resource "azurerm_network_security_group" "app_dev_isc_01" {
   name                = "nsg-app-dev-isc-01"
   location            = "indiasouthcentral"
-  resource_group_name = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name = "rg-appnet-dev-isc-01"
 
   security_rule {
     name                       = "Allow-SSH-Any"
@@ -74,6 +78,8 @@ resource "azurerm_network_security_group" "app_dev_isc_01" {
     source_address_prefix      = "VirtualNetwork"
     destination_address_prefix = "VirtualNetwork"
   }
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet_network_security_group_association" "app_dev_isc_vnet01_subnet01" {
@@ -84,8 +90,10 @@ resource "azurerm_subnet_network_security_group_association" "app_dev_isc_vnet01
 resource "azurerm_route_table" "app_dev_isc_01" {
   name                          = "rt-app-dev-isc-01"
   location                      = "indiasouthcentral"
-  resource_group_name           = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name           = "rg-appnet-dev-isc-01"
   bgp_route_propagation_enabled = true
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet_route_table_association" "app_dev_isc_vnet01_subnet01" {
@@ -95,15 +103,17 @@ resource "azurerm_subnet_route_table_association" "app_dev_isc_vnet01_subnet01" 
 
 resource "azurerm_subnet" "app_dev_isc_vnet01_subnet02" {
   name                 = "subnet-app-dev-isc-02"
-  resource_group_name  = azurerm_resource_group.appnet_dev_isc.name
-  virtual_network_name = azurerm_virtual_network.app_dev_isc_01.name
+  resource_group_name  = "rg-appnet-dev-isc-01"
+  virtual_network_name = "vnet-app-dev-isc-01"
   address_prefixes     = ["10.20.2.0/24"]
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
 }
 
 resource "azurerm_network_security_group" "app_dev_isc_02" {
   name                = "nsg-app-dev-isc-02"
   location            = "indiasouthcentral"
-  resource_group_name = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name = "rg-appnet-dev-isc-01"
 
   security_rule {
     name                       = "Allow-SSH-Any"
@@ -152,6 +162,8 @@ resource "azurerm_network_security_group" "app_dev_isc_02" {
     source_address_prefix      = "VirtualNetwork"
     destination_address_prefix = "VirtualNetwork"
   }
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet_network_security_group_association" "app_dev_isc_vnet01_subnet02" {
@@ -162,8 +174,10 @@ resource "azurerm_subnet_network_security_group_association" "app_dev_isc_vnet01
 resource "azurerm_route_table" "app_dev_isc_02" {
   name                          = "rt-app-dev-isc-02"
   location                      = "indiasouthcentral"
-  resource_group_name           = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name           = "rg-appnet-dev-isc-01"
   bgp_route_propagation_enabled = true
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet_route_table_association" "app_dev_isc_vnet01_subnet02" {
@@ -174,21 +188,25 @@ resource "azurerm_subnet_route_table_association" "app_dev_isc_vnet01_subnet02" 
 resource "azurerm_virtual_network" "app_dev_isc_02" {
   name                = "vnet-app-dev-isc-02"
   location            = "indiasouthcentral"
-  resource_group_name = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name = "rg-appnet-dev-isc-01"
   address_space       = ["10.21.0.0/16"]
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet" "app_dev_isc_vnet02_subnet01" {
   name                 = "subnet-app-dev-isc-01"
-  resource_group_name  = azurerm_resource_group.appnet_dev_isc.name
-  virtual_network_name = azurerm_virtual_network.app_dev_isc_02.name
+  resource_group_name  = "rg-appnet-dev-isc-01"
+  virtual_network_name = "vnet-app-dev-isc-02"
   address_prefixes     = ["10.21.1.0/24"]
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
 }
 
 resource "azurerm_network_security_group" "app_dev_isc_03" {
   name                = "nsg-app-dev-isc-03"
   location            = "indiasouthcentral"
-  resource_group_name = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name = "rg-appnet-dev-isc-01"
 
   security_rule {
     name                       = "Allow-SSH-Any"
@@ -237,6 +255,8 @@ resource "azurerm_network_security_group" "app_dev_isc_03" {
     source_address_prefix      = "VirtualNetwork"
     destination_address_prefix = "VirtualNetwork"
   }
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet_network_security_group_association" "app_dev_isc_vnet02_subnet01" {
@@ -247,8 +267,10 @@ resource "azurerm_subnet_network_security_group_association" "app_dev_isc_vnet02
 resource "azurerm_route_table" "app_dev_isc_03" {
   name                          = "rt-app-dev-isc-03"
   location                      = "indiasouthcentral"
-  resource_group_name           = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name           = "rg-appnet-dev-isc-01"
   bgp_route_propagation_enabled = true
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet_route_table_association" "app_dev_isc_vnet02_subnet01" {
@@ -258,15 +280,17 @@ resource "azurerm_subnet_route_table_association" "app_dev_isc_vnet02_subnet01" 
 
 resource "azurerm_subnet" "app_dev_isc_vnet02_subnet02" {
   name                 = "subnet-app-dev-isc-02"
-  resource_group_name  = azurerm_resource_group.appnet_dev_isc.name
-  virtual_network_name = azurerm_virtual_network.app_dev_isc_02.name
+  resource_group_name  = "rg-appnet-dev-isc-01"
+  virtual_network_name = "vnet-app-dev-isc-02"
   address_prefixes     = ["10.21.2.0/24"]
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
 }
 
 resource "azurerm_network_security_group" "app_dev_isc_04" {
   name                = "nsg-app-dev-isc-04"
   location            = "indiasouthcentral"
-  resource_group_name = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name = "rg-appnet-dev-isc-01"
 
   security_rule {
     name                       = "Allow-SSH-Any"
@@ -315,6 +339,8 @@ resource "azurerm_network_security_group" "app_dev_isc_04" {
     source_address_prefix      = "VirtualNetwork"
     destination_address_prefix = "VirtualNetwork"
   }
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet_network_security_group_association" "app_dev_isc_vnet02_subnet02" {
@@ -325,11 +351,265 @@ resource "azurerm_subnet_network_security_group_association" "app_dev_isc_vnet02
 resource "azurerm_route_table" "app_dev_isc_04" {
   name                          = "rt-app-dev-isc-04"
   location                      = "indiasouthcentral"
-  resource_group_name           = azurerm_resource_group.appnet_dev_isc.name
+  resource_group_name           = "rg-appnet-dev-isc-01"
   bgp_route_propagation_enabled = true
+
+  depends_on = [azurerm_resource_group.appnet_dev_isc]
 }
 
 resource "azurerm_subnet_route_table_association" "app_dev_isc_vnet02_subnet02" {
   subnet_id      = azurerm_subnet.app_dev_isc_vnet02_subnet02.id
   route_table_id = azurerm_route_table.app_dev_isc_04.id
+}
+
+resource "azurerm_virtual_network_peering" "isc01_to_mw01" {
+  name                      = "peer-isc01-to-mw01"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-01"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-mw-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-mw-01"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
+}
+
+resource "azurerm_virtual_network_peering" "isc01_to_mw02" {
+  name                      = "peer-isc01-to-mw02"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-01"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-mw-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-mw-02"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
+}
+
+resource "azurerm_virtual_network_peering" "isc01_to_isc02" {
+  name                      = "peer-isc01-to-isc02"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-01"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-isc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-isc-02"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
+}
+
+resource "azurerm_virtual_network_peering" "isc01_to_ea01" {
+  name                      = "peer-isc01-to-ea01"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-01"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-01"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
+}
+
+resource "azurerm_virtual_network_peering" "isc01_to_ea02" {
+  name                      = "peer-isc01-to-ea02"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-01"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-02"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
+}
+
+resource "azurerm_virtual_network_peering" "isc01_to_un01" {
+  name                      = "peer-isc01-to-un01"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-01"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-un-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-un-01"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
+}
+
+resource "azurerm_virtual_network_peering" "isc01_to_un02" {
+  name                      = "peer-isc01-to-un02"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-01"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-un-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-un-02"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
+}
+
+resource "azurerm_virtual_network_peering" "isc01_to_kc01" {
+  name                      = "peer-isc01-to-kc01"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-01"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-kc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-kc-01"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
+}
+
+resource "azurerm_virtual_network_peering" "isc01_to_kc02" {
+  name                      = "peer-isc01-to-kc02"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-01"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-kc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-kc-02"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_01]
+}
+
+resource "azurerm_virtual_network_peering" "isc02_to_mw01" {
+  name                      = "peer-isc02-to-mw01"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-02"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-mw-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-mw-01"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
+}
+
+resource "azurerm_virtual_network_peering" "isc02_to_mw02" {
+  name                      = "peer-isc02-to-mw02"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-02"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-mw-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-mw-02"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
+}
+
+resource "azurerm_virtual_network_peering" "isc02_to_isc01" {
+  name                      = "peer-isc02-to-isc01"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-02"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-isc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-isc-01"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
+}
+
+resource "azurerm_virtual_network_peering" "isc02_to_ea01" {
+  name                      = "peer-isc02-to-ea01"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-02"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-01"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
+}
+
+resource "azurerm_virtual_network_peering" "isc02_to_ea02" {
+  name                      = "peer-isc02-to-ea02"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-02"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-02"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
+}
+
+resource "azurerm_virtual_network_peering" "isc02_to_un01" {
+  name                      = "peer-isc02-to-un01"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-02"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-un-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-un-01"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
+}
+
+resource "azurerm_virtual_network_peering" "isc02_to_un02" {
+  name                      = "peer-isc02-to-un02"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-02"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-un-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-un-02"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
+}
+
+resource "azurerm_virtual_network_peering" "isc02_to_kc01" {
+  name                      = "peer-isc02-to-kc01"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-02"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-kc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-kc-01"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
+}
+
+resource "azurerm_virtual_network_peering" "isc02_to_kc02" {
+  name                      = "peer-isc02-to-kc02"
+  resource_group_name       = "rg-appnet-dev-isc-01"
+  virtual_network_name      = "vnet-app-dev-isc-02"
+  remote_virtual_network_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-appnet-dev-kc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-kc-02"
+
+  allow_virtual_network_access = true
+  allow_forwarded_traffic      = false
+  allow_gateway_transit        = false
+  use_remote_gateways          = false
+
+  depends_on = [azurerm_virtual_network.app_dev_isc_02]
 }
