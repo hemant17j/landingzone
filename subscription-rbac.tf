@@ -42,7 +42,7 @@ resource "azurerm_role_assignment" "root_acr_delete" {
 
 resource "azurerm_role_assignment" "root_aks_contributor" {
   scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "Azure Kubernetes Service Contributor"
+  role_definition_name = "Azure Kubernetes Service Contributor Role"
   principal_id         = "5c31484e-cd53-4e9e-b30e-b29fb9f867a3"
 }
 
