@@ -6,8 +6,8 @@ provider "azurerm" {
 # Public IP
 ###################################################
 
-resource "azurerm_public_ip" "github_vm" {
-  name                = "pip-githubactions-dev-ea-01"
+resource "azurerm_public_ip" "sonarqube_vm" {
+  name                = "pip-sonarqube-dev-ea-01"
   location            = "eastasia"
   resource_group_name = "rg-app-dev-ea-01"
 
@@ -16,7 +16,7 @@ resource "azurerm_public_ip" "github_vm" {
 
   tags = {
     Environment = "Dev"
-    Workload    = "GitHubActions"
+    Workload    = "SonarQube"
   }
 }
 
@@ -24,8 +24,8 @@ resource "azurerm_public_ip" "github_vm" {
 # Network Interface
 ###################################################
 
-resource "azurerm_network_interface" "github_vm" {
-  name                = "nic-githubactions-dev-ea-01"
+resource "azurerm_network_interface" "sonarqube_vm" {
+  name                = "nic-sonarqube-dev-ea-01"
   location            = "eastasia"
   resource_group_name = "rg-app-dev-ea-01"
 
@@ -33,21 +33,21 @@ resource "azurerm_network_interface" "github_vm" {
     name                          = "internal"
     subnet_id                     = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-01/subnets/subnet-app-dev-ea-01"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.github_vm.id
+    public_ip_address_id          = azurerm_public_ip.sonarqube_vm.id
   }
 
   tags = {
     Environment = "Dev"
-    Workload    = "GitHubActions"
+    Workload    = "SonarQube"
   }
 }
 
 ###################################################
-# GitHub Actions VM
+# SonarQube VM
 ###################################################
 
-resource "azurerm_linux_virtual_machine" "github_actions" {
-  name                = "vm-githubactions-dev-ea-01"
+resource "azurerm_linux_virtual_machine" "sonarqube" {
+  name                = "vm-sonarqube-dev-ea-01"
   location            = "eastasia"
   resource_group_name = "rg-app-dev-ea-01"
 
@@ -63,7 +63,7 @@ resource "azurerm_linux_virtual_machine" "github_actions" {
   )
 
   network_interface_ids = [
-    azurerm_network_interface.github_vm.id
+    azurerm_network_interface.sonarqube_vm.id
   ]
 
   identity {
@@ -78,14 +78,14 @@ resource "azurerm_linux_virtual_machine" "github_actions" {
   }
 
   os_disk {
-    name                 = "osdisk-githubactions-dev-ea-01"
+    name                 = "osdisk-sonarqube-dev-ea-01"
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
 
   tags = {
     Environment = "Dev"
-    Workload    = "GitHubActions"
+    Workload    = "SonarQube"
   }
 }
 
@@ -96,89 +96,89 @@ resource "azurerm_linux_virtual_machine" "github_actions" {
 resource "azurerm_role_assignment" "root_network_contributor" {
   scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
   role_definition_name = "Network Contributor"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
 }
 
 resource "azurerm_role_assignment" "root_storage_account_contributor" {
   scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
   role_definition_name = "Storage Account Contributor"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
 }
 
 resource "azurerm_role_assignment" "root_storage_blob_data_contributor" {
   scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
 }
 
 resource "azurerm_role_assignment" "root_key_vault_contributor" {
   scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
   role_definition_name = "Key Vault Contributor"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
 }
 
 resource "azurerm_role_assignment" "root_key_vault_secrets_user" {
   scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
   role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "root_acr_push" {
-  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "AcrPush"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "root_acr_delete" {
-  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "AcrDelete"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "root_aks_contributor" {
-  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "Azure Kubernetes Service Contributor Role"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "root_aks_rbac_cluster_admin" {
-  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "root_managed_identity_contributor" {
-  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "Managed Identity Contributor"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "root_managed_identity_operator" {
-  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "Managed Identity Operator"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "root_monitoring_contributor" {
-  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "Monitoring Contributor"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "root_log_analytics_contributor" {
-  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "Log Analytics Contributor"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
-}
-
-resource "azurerm_role_assignment" "root_user_access_administrator" {
-  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
-  role_definition_name = "User Access Administrator"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
 }
 
 resource "azurerm_role_assignment" "root_key_vault_administrator" {
   scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
   role_definition_name = "Key Vault Administrator"
-  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_acr_push" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "AcrPush"
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_acr_delete" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "AcrDelete"
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_aks_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Azure Kubernetes Service Contributor Role"
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_aks_rbac_cluster_admin" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_managed_identity_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Managed Identity Contributor"
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_managed_identity_operator" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_monitoring_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Monitoring Contributor"
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_log_analytics_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Log Analytics Contributor"
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_user_access_administrator" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "User Access Administrator"
+  principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
 }
