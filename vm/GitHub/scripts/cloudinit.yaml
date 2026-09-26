@@ -23,6 +23,7 @@ packages:
   - ca-certificates
   - curl
   - gnupg
+  - gpg
   - jq
   - lsb-release
   - python3
@@ -96,7 +97,7 @@ write_files:
       PRIVATE_KEY_SECRET_NAME="github-private-key"
       RUNNER_VERSION="2.317.0"
       # Bump this version manually after changes to this script
-      SCRIPT_VERSION="0.0.9"
+      SCRIPT_VERSION="0.0.10"
 
       ##
       # GitHub Enterprise Cloud with data residency API base
@@ -147,6 +148,45 @@ write_files:
       }
 
       # -----------------------------
+      # kubectl
+      # -----------------------------
+      install_kubectl() {
+        if command -v kubectl >/dev/null 2>&1; then
+          log "kubectl already installed"
+          return
+        fi
+
+        log "Installing kubectl"
+        mkdir -p -m 755 /etc/apt/keyrings
+
+        curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key \
+          | gpg --dearmor --yes -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+        chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+        echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /" \
+          > /etc/apt/sources.list.d/kubernetes.list
+
+        apt-get update -q
+        apt-get install -y kubectl
+        kubectl version --client
+      }
+
+      # -----------------------------
+      # Helm
+      # -----------------------------
+      install_helm() {
+        if command -v helm >/dev/null 2>&1; then
+          log "Helm already installed"
+          return
+        fi
+
+        log "Installing Helm"
+        curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+        helm version
+      }
+
+      # -----------------------------
       # GitHub CLI
       # -----------------------------
       install_gh_cli() {
@@ -165,49 +205,7 @@ write_files:
         apt-get update -q
         apt-get install -y gh
       }
-     install_kubectl() {
 
-  if command -v kubectl >/dev/null 2>&1; then
-    log "kubectl already installed"
-    return
-  fi
-
-  log "Installing kubectl"
-
-  ARCH=$(dpkg --print-architecture)
-
-  case "$ARCH" in
-      amd64)
-          KUBECTL_ARCH="amd64"
-          ;;
-      arm64)
-          KUBECTL_ARCH="arm64"
-          ;;
-      *)
-          fail "Unsupported architecture for kubectl: $ARCH"
-          ;;
-  esac
-
-  curl -fsSL -o /tmp/kubectl \
-      "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${KUBECTL_ARCH}/kubectl"
-
-  install -m 0755 /tmp/kubectl /usr/local/bin/kubectl
-
-  kubectl version --client || true
-}
-    install_helm() {
-
-  if command -v helm >/dev/null 2>&1; then
-    log "Helm already installed"
-    return
-  fi
-
-  log "Installing Helm"
-
-  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-  helm version || true
-}
       # -----------------------------
       # Azure managed identity login
       # -----------------------------
@@ -377,9 +375,9 @@ write_files:
 
         install_docker
         install_azure_cli
-        install_gh_cli
         install_kubectl
         install_helm
+        install_gh_cli
         az_login_identity
 
         log "Fetching secrets"
