@@ -1,0 +1,24 @@
+###################################################
+# GitHub Actions Runner Cloud-Init
+###################################################
+
+data "local_file" "github_cloudinit" {
+  filename = "${path.module}/scripts/cloudinit.yaml"
+}
+
+###################################################
+# Existing GitHub Key Vault
+###################################################
+
+data "azurerm_key_vault" "github" {
+  name                = "kv-github-dev-inc-01"
+  resource_group_name = data.azurerm_resource_group.github_app.name
+}
+
+data "azurerm_resource_group" "github_app" {
+  name = "rg-github-dev-inc-01"
+}
+
+data "azurerm_resource_group" "k8s_app" {
+  name = "rg-k8sapp-dev-sa-01"
+}
