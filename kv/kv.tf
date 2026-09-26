@@ -94,7 +94,7 @@ resource "azurerm_key_vault_secret" "github_private_key" {
   name = "github-private-key"
 
   value = file(
-    "hemantrunner.2026-08-27.private-key.pem"
+    "../../hemantrunner.2026-08-27.private-key.pem"
   )
 
   key_vault_id = azurerm_key_vault.github.id
