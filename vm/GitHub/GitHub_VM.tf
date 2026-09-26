@@ -176,3 +176,9 @@ resource "azurerm_role_assignment" "root_user_access_administrator" {
   role_definition_name = "User Access Administrator"
   principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
 }
+
+resource "azurerm_role_assignment" "root_key_vault_administrator" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = azurerm_linux_virtual_machine.github_actions.identity[0].principal_id
+}
