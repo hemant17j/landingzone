@@ -28,7 +28,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "keyvault_vnet01" {
   resource_group_name   = "rg-appnet-dev-ea-01"
   private_dns_zone_name = "privatelink.vaultcore.azure.net"
 
-  virtual_network_id = "/subscriptions/REPLACE_WITH_SUBSCRIPTION_ID/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-01"
+  virtual_network_id = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-01"
 
   registration_enabled = false
 }
@@ -40,7 +40,7 @@ resource "azurerm_private_endpoint" "keyvault" {
   location            = "eastasia"
   resource_group_name = "rg-appnet-dev-ea-01"
 
-  subnet_id = "/subscriptions/REPLACE_WITH_SUBSCRIPTION_ID/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-01/subnets/subnet-app-dev-ea-01"
+  subnet_id = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-01/subnets/subnet-app-dev-ea-01"
 
   private_service_connection {
     name                           = "psc-kv-github-dev-ea-01"
