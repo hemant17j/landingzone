@@ -53,7 +53,7 @@ resource "azurerm_linux_virtual_machine" "sonarqube" {
   location            = "malaysiawest"
   resource_group_name = "rg-app-dev-mw-01"
 
-  size = "Standard_D2_v4"
+  size = "Standard_B2as_v2"
 
   admin_username = "hemant"
   admin_password = "Hemant@1234567"
