@@ -1,3 +1,5 @@
+/*
+
 provider "azurerm" {
   features {}
 }
@@ -182,3 +184,5 @@ resource "azurerm_role_assignment" "root_user_access_administrator" {
   role_definition_name = "User Access Administrator"
   principal_id         = azurerm_linux_virtual_machine.sonarqube.identity[0].principal_id
 }
+
+*/
