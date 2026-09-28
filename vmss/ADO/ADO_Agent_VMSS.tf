@@ -3,21 +3,57 @@ provider "azurerm" {
 }
 
 ###################################################
-# Public IP Prefix
+# NAT Gateway Public IP
 ###################################################
 
-resource "azurerm_public_ip_prefix" "ado_vmss" {
-  name                = "pipprefix-adoagents-dev-mw-01"
+resource "azurerm_public_ip" "ado_natgw" {
+  name                = "pip-natgw-adoagents-dev-mw-01"
   location            = "malaysiawest"
   resource_group_name = "rg-app-dev-mw-01"
 
-  prefix_length = 28
-  sku           = "Standard"
+  allocation_method = "Static"
+  sku               = "Standard"
 
   tags = {
     Environment = "Dev"
     Workload    = "ADOAgents"
   }
+}
+
+###################################################
+# NAT Gateway
+###################################################
+
+resource "azurerm_nat_gateway" "ado_natgw" {
+  name                = "natgw-adoagents-dev-mw-01"
+  location            = "malaysiawest"
+  resource_group_name = "rg-app-dev-mw-01"
+
+  sku_name = "Standard"
+
+  tags = {
+    Environment = "Dev"
+    Workload    = "ADOAgents"
+  }
+}
+
+###################################################
+# NAT Gateway Public IP Association
+###################################################
+
+resource "azurerm_nat_gateway_public_ip_association" "ado_natgw" {
+  nat_gateway_id       = azurerm_nat_gateway.ado_natgw.id
+  public_ip_address_id = azurerm_public_ip.ado_natgw.id
+}
+
+###################################################
+# NAT Gateway Subnet Association
+###################################################
+
+resource "azurerm_subnet_nat_gateway_association" "ado_natgw" {
+  subnet_id = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-mw-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-mw-01/subnets/subnet-app-dev-mw-01"
+
+  nat_gateway_id = azurerm_nat_gateway.ado_natgw.id
 }
 
 ###################################################
@@ -30,8 +66,11 @@ resource "azurerm_linux_virtual_machine_scale_set" "ado_agents" {
   location            = "malaysiawest"
   resource_group_name = "rg-app-dev-mw-01"
 
-  sku       = "Standard_B2ats_v2"
-  instances = 1
+  sku = "Standard_B2ats_v2"
+
+  instances     = 1
+  upgrade_mode  = "Manual"
+  overprovision = false
 
   admin_username = "hemant"
   admin_password = "Hemant@1234567"
@@ -67,11 +106,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "ado_agents" {
       primary = true
 
       subnet_id = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-mw-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-mw-01/subnets/subnet-app-dev-mw-01"
-
-      public_ip_address {
-        name                = "pip-adoagents-dev-mw-01"
-        public_ip_prefix_id = azurerm_public_ip_prefix.ado_vmss.id
-      }
     }
   }
 
