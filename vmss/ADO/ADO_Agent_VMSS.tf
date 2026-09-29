@@ -1,71 +1,160 @@
-#cloud-config
+provider "azurerm" {
+  features {}
+}
 
-package_update: true
-package_upgrade: true
+###################################################
+# Azure DevOps Agent VMSS
+###################################################
 
-groups:
-  - docker
+resource "azurerm_linux_virtual_machine_scale_set" "ado_agents" {
 
-system_info:
-  default_user:
-    groups: [ docker ]
+  name                = "vmss-adoagents-dev-mw-01"
+  location            = "malaysiawest"
+  resource_group_name = "rg-app-dev-mw-01"
 
-packages:
-  - apt-transport-https
-  - ca-certificates
-  - curl
-  - zip
-  - unzip
-  - gnupg
-  - lsb-release
-  - unattended-upgrades
-  - software-properties-common
-  - python3
-  - python3-pip
-  - libssl-dev
+  sku = "Standard_B2ats_v2"
 
-runcmd:
+  instances     = 1
+  upgrade_mode  = "Manual"
+  overprovision = false
 
-  # Docker repository
-  - mkdir -p /etc/apt/keyrings
-  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  admin_username = "hemant"
+  admin_password = "Hemant@1234567"
 
-  # Python 3.10 repository
-  - add-apt-repository -y ppa:deadsnakes/ppa
+  disable_password_authentication = false
 
-  # Update repositories
-  - apt-get update
+  custom_data = base64encode(
+    data.local_file.github_cloudinit.content
+  )
 
-  # Docker
-  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  identity {
+    type = "SystemAssigned"
+  }
 
-  # Python 3.10
-  - apt-get install -y python3.10 python3.10-venv python3.10-dev python3-pip
-  - update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "ubuntu-24_04-lts"
+    sku       = "server"
+    version   = "latest"
+  }
 
-  # Docker service
-  - systemctl enable docker
-  - systemctl start docker
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
 
-  # Istioctl
-  - curl -L https://istio.io/downloadIstio | sh -
-  - mv istio-*/bin/istioctl /usr/local/bin/
+  network_interface {
+    name    = "nic-adoagents-dev-mw-01"
+    primary = true
 
-  # kubectl
-  - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-  - install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    ip_configuration {
+      name      = "internal"
+      primary   = true
 
-  # Terraform
-  - curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-  - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-  - apt-get update
-  - apt-get install -y terraform
+      subnet_id = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-mw-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-mw-01/subnets/subnet-app-dev-mw-01"
 
-  # Helm
-  - curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      public_ip_address {
+        name = "pip-adoagents-dev-mw-01"
+      }
+    }
+  }
 
-  # Azure CLI
-  - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+  tags = {
+    Environment = "Dev"
+    Workload    = "ADOAgents"
+  }
+}
 
-final_message: "Azure DevOps agent VMSS initialization completed after $UPTIME seconds"
+###################################################
+# Subscription Level RBAC Assignments
+###################################################
+
+resource "azurerm_role_assignment" "root_network_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_storage_account_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Storage Account Contributor"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_storage_blob_data_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_key_vault_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Key Vault Contributor"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_key_vault_secrets_user" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_acr_push" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "AcrPush"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_acr_delete" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "AcrDelete"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_aks_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Azure Kubernetes Service Contributor Role"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_aks_rbac_cluster_admin" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_managed_identity_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Managed Identity Contributor"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_managed_identity_operator" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_monitoring_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Monitoring Contributor"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_log_analytics_contributor" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Log Analytics Contributor"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_user_access_administrator" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "User Access Administrator"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
+
+resource "azurerm_role_assignment" "root_key_vault_administrator" {
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82"
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = azurerm_linux_virtual_machine_scale_set.ado_agents.identity[0].principal_id
+}
