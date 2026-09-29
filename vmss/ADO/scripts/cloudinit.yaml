@@ -1,7 +1,7 @@
 #cloud-config
 
 package_update: true
-package_upgrade: true
+package_upgrade: false
 
 groups:
   - docker
@@ -26,9 +26,9 @@ packages:
 
 runcmd:
 
-  # ------------------------------------------------------------
+  # ============================================================
   # Docker
-  # ------------------------------------------------------------
+  # ============================================================
 
   - mkdir -p /etc/apt/keyrings
 
@@ -41,27 +41,25 @@ runcmd:
   - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 
   - systemctl enable docker
+
   - systemctl start docker
 
-  # ------------------------------------------------------------
-  # Python 3.10
-  # ------------------------------------------------------------
 
-  # Add deadsnakes repository for Python 3.10
+  # ============================================================
+  # Python 3.10
+  # Keep Ubuntu 24.04 native Python 3.12 as /usr/bin/python3
+  # ============================================================
+
   - add-apt-repository -y ppa:deadsnakes/ppa
 
   - apt-get update
 
   - apt-get install -y python3.10 python3.10-venv python3.10-dev
 
-  # IMPORTANT:
-  # Do NOT change /usr/bin/python3.
-  # Ubuntu 24.04 system utilities depend on the
-  # system Python and apt_pkg module.
 
-  # ------------------------------------------------------------
+  # ============================================================
   # Istio
-  # ------------------------------------------------------------
+  # ============================================================
 
   - sleep 30
 
@@ -69,9 +67,10 @@ runcmd:
 
   - mv istio-*/bin/istioctl /usr/local/bin/
 
-  # ------------------------------------------------------------
+
+  # ============================================================
   # kubectl
-  # ------------------------------------------------------------
+  # ============================================================
 
   - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 
@@ -79,9 +78,10 @@ runcmd:
 
   - rm -f kubectl
 
-  # ------------------------------------------------------------
+
+  # ============================================================
   # Terraform
-  # ------------------------------------------------------------
+  # ============================================================
 
   - curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
 
@@ -91,29 +91,40 @@ runcmd:
 
   - apt-get install -y terraform
 
-  # ------------------------------------------------------------
+
+  # ============================================================
   # Helm
-  # ------------------------------------------------------------
+  # ============================================================
 
   - curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-  # ------------------------------------------------------------
+
+  # ============================================================
   # Azure CLI
-  # ------------------------------------------------------------
+  # ============================================================
 
   - curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 
-  # ------------------------------------------------------------
+
+  # ============================================================
   # Final verification
-  # ------------------------------------------------------------
+  # ============================================================
 
   - docker --version
+
   - python3 --version
+
   - python3.10 --version
+
   - kubectl version --client
+
   - terraform version
+
   - helm version
+
   - az version
-  - istioctl version
+
+  - which istioctl
+
 
 final_message: "ADO VMSS agent VM initialization completed after $UPTIME seconds"
