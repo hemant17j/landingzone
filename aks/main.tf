@@ -42,7 +42,7 @@ resource "local_sensitive_file" "aks_private_key" {
 resource "azurerm_ssh_public_key" "aks" {
   name                = "sshkey-aks-private-01"
   resource_group_name = "rg-app-dev-isc-01"
-  location            = "southcentralindia"
+  location            = "indiasouthcentral"
 
   public_key = tls_private_key.aks.public_key_openssh
 
@@ -59,7 +59,7 @@ resource "azurerm_ssh_public_key" "aks" {
 resource "azurerm_user_assigned_identity" "aks" {
   name                = "id-aks-dev-isc-01"
   resource_group_name = "rg-app-dev-isc-01"
-  location            = "southcentralindia"
+  location            = "indiasouthcentral"
 
   tags = {
     Environment = "dev"
@@ -83,7 +83,7 @@ resource "azurerm_role_assignment" "aks_network_contributor" {
 
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "aks-dev-cluster-isc-01"
-  location            = "southcentralindia"
+  location            = "indiasouthcentral"
   resource_group_name = "rg-app-dev-isc-01"
   dns_prefix          = "aks"
 
