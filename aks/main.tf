@@ -103,7 +103,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
   default_node_pool {
     name           = "system"
     node_count     = 2
-    vm_size        = "Standard_D2s_v5"
+    vm_size        = "Standard_B2ats_v2"
     vnet_subnet_id = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-isc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-isc-01/subnets/subnet-app-dev-isc-02"
     type           = "VirtualMachineScaleSets"
   }
