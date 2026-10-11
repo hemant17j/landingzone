@@ -42,7 +42,7 @@ resource "local_sensitive_file" "aks_private_key" {
 resource "azurerm_ssh_public_key" "aks" {
   name                = "sshkey-aks-private-01"
   resource_group_name = "rg-app-dev-isc-01"
-  location            = "indiasouthcentral"
+  location            = "southcentralindia"
 
   public_key = tls_private_key.aks.public_key_openssh
 
@@ -59,7 +59,7 @@ resource "azurerm_ssh_public_key" "aks" {
 resource "azurerm_user_assigned_identity" "aks" {
   name                = "id-aks-dev-isc-01"
   resource_group_name = "rg-app-dev-isc-01"
-  location            = "indiasouthcentral"
+  location            = "southcentralindia"
 
   tags = {
     Environment = "dev"
@@ -83,9 +83,12 @@ resource "azurerm_role_assignment" "aks_network_contributor" {
 
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "aks-dev-cluster-isc-01"
-  location            = "indiasouthcentral"
+  location            = "southcentralindia"
   resource_group_name = "rg-app-dev-isc-01"
   dns_prefix          = "aks"
+
+  # Explicit Node Resource Group (must NOT exist prior to deployment)
+  node_resource_group = "rg-aks_node-dev-isc-01"
 
   # Enforce private control plane
   private_cluster_enabled = true
@@ -114,6 +117,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     network_plugin_mode = "overlay"
     load_balancer_sku   = "standard"
 
+    # Non-overlapping CIDRs for Overlay and K8s Cluster Services
     pod_cidr       = "10.244.0.0/16"
     service_cidr   = "172.20.0.0/16"
     dns_service_ip = "172.20.0.10"
