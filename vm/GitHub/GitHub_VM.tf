@@ -51,7 +51,7 @@ resource "azurerm_linux_virtual_machine" "github_actions" {
   location            = "eastasia"
   resource_group_name = "rg-app-dev-ea-01"
 
-  size = "Standard_B4ms"
+  size = "Standard_B2ms"
 
   admin_username = "hemant"
   admin_password = "Hemant@1234567"
