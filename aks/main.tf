@@ -42,7 +42,7 @@ resource "local_sensitive_file" "aks_private_key" {
 resource "azurerm_ssh_public_key" "aks" {
   name                = "sshkey-aks-private-01"
   resource_group_name = "rg-app-dev-isc-01"
-  location            = "eastus"
+  location            = "southcentralindia"
 
   public_key = tls_private_key.aks.public_key_openssh
 
@@ -59,7 +59,7 @@ resource "azurerm_ssh_public_key" "aks" {
 resource "azurerm_user_assigned_identity" "aks" {
   name                = "id-aks-dev-isc-01"
   resource_group_name = "rg-app-dev-isc-01"
-  location            = "eastus"
+  location            = "southcentralindia"
 
   tags = {
     Environment = "dev"
@@ -69,7 +69,7 @@ resource "azurerm_user_assigned_identity" "aks" {
 
 # Grants the cluster identity permission to attach NICs to your subnet
 resource "azurerm_role_assignment" "aks_network_contributor" {
-  scope                = "/subscriptions/SUBSCRIPTION_ID/resourceGroups/my-existing-rg/providers/Microsoft.Network/virtualNetworks/my-existing-vnet/subnets/aks-subnet"
+  scope                = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-isc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-isc-01"
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_user_assigned_identity.aks.principal_id
   principal_type       = "ServicePrincipal"
@@ -83,7 +83,7 @@ resource "azurerm_role_assignment" "aks_network_contributor" {
 
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "aks-dev-cluster-isc-01"
-  location            = "eastus"
+  location            = "southcentralindia"
   resource_group_name = "rg-app-dev-isc-01"
   dns_prefix          = "aks"
 
@@ -104,7 +104,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
     name           = "system"
     node_count     = 2
     vm_size        = "Standard_D2s_v5"
-    vnet_subnet_id = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-isc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-isc-01"
+    vnet_subnet_id = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-isc-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-isc-01/subnets/subnet-app-dev-isc-02"
     type           = "VirtualMachineScaleSets"
   }
 
@@ -114,9 +114,9 @@ resource "azurerm_kubernetes_cluster" "aks" {
     network_plugin_mode = "overlay"
     load_balancer_sku   = "standard"
 
-    pod_cidr       = "10.0.2.0/16"
-    service_cidr   = "10.0.1.0/16"
-    dns_service_ip = "10.0.1.10"
+    pod_cidr       = "10.244.0.0/16"
+    service_cidr   = "172.20.0.0/16"
+    dns_service_ip = "172.20.0.10"
   }
 
   # Linux OS credentials injected into all nodes
