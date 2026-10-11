@@ -3,11 +3,6 @@ resource "azurerm_resource_group" "app_dev_isc" {
   location = "indiasouthcentral"
 }
 
-resource "azurerm_resource_group" "aks_node_dev_isc" {
-  name     = "rg-aks_node-dev-isc-01"
-  location = "indiasouthcentral"
-}
-
 resource "azurerm_resource_group" "appnet_dev_isc" {
   name     = "rg-appnet-dev-isc-01"
   location = "indiasouthcentral"
