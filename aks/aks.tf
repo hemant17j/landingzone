@@ -142,16 +142,18 @@ resource "azurerm_kubernetes_cluster" "aks" {
   ]
 }
 
+# Read the actual Private DNS Zone created by Azure in the node resource group
+data "azurerm_resources" "aks_dns_zone" {
+  resource_group_name = "rg-aks_node-dev-isc-01"
+  type                = "Microsoft.Network/privateDnsZones"
+}
+
 resource "azurerm_private_dns_zone_virtual_network_link" "github_runner_vnet_link" {
   name                  = "link-github-runner-vnet"
-  resource_group_name   = azurerm_kubernetes_cluster.aks.node_resource_group
-  private_dns_zone_name = element(split("/", azurerm_kubernetes_cluster.aks.private_dns_zone_id), length(split("/", azurerm_kubernetes_cluster.aks.private_dns_zone_id)) - 1)
-  
-  # REPLACE THIS with the actual Resource ID of your runner VM's VNet in East Asia
-  virtual_network_id   = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-01"
-  
-  registration_enabled = false
-
+  resource_group_name   = "rg-aks_node-dev-isc-01"
+  private_dns_zone_name = data.azurerm_resources.aks_dns_zone.resources[0].name
+  virtual_network_id    = "/subscriptions/3aee3430-ef4c-4171-b904-ec2dd5416a82/resourceGroups/rg-appnet-dev-ea-01/providers/Microsoft.Network/virtualNetworks/vnet-app-dev-ea-01"
+  registration_enabled  = false
   depends_on = [
     azurerm_kubernetes_cluster.aks
   ]
